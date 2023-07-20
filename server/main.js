@@ -10,6 +10,9 @@ import bodyParser from 'body-parser'; // PARSE HTML BODY
 import mongoose from 'mongoose';
 import session from 'express-session';
 
+/* setup routers & static directory */
+import api from './routes';
+
 const app = express();
 const port = 3000;
 
@@ -22,6 +25,8 @@ db.once('open', () => { console.log('Connected to mongodb server'); });
 // mongoose.connect('mongodb://username:password@host:port/database=');
 mongoose.connect('mongodb://localhost/codelab');
 
+app.use('/api', api);
+
 /* use session */
 app.use(session({
     secret: 'CodeLab1$1$234',
@@ -29,8 +34,14 @@ app.use(session({
     saveUninitialized: true
 }));
 
+/* handle error */
+app.use(function(err, req, res, next) {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+  });
+
 app.use('/', express.static(path.join(__dirname, './../public')));
-    
+
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 
